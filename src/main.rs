@@ -1,5 +1,7 @@
 use trpl;
 use std::time::Duration;
+use std::pin::Pin;
+use std::future::Future;
 
 fn main() {
     trpl::block_on(async {
@@ -39,7 +41,12 @@ fn main() {
                 trpl::sleep(Duration::from_millis(1500)).await;
             }
         };
+        let futures = vec![
+            Box::pin(tx1_fut) as Pin<Box<dyn Future<Output = ()>>>,
+            Box::pin(rx_fut) as Pin<Box<dyn Future<Output = ()>>>,
+            Box::pin(tx_fut) as Pin<Box<dyn Future<Output = ()>>>,
+        ];
 
-        trpl::join!(tx1_fut, tx_fut, rx_fut);
+        trpl::join_all(futures).await;
     })    
 }
